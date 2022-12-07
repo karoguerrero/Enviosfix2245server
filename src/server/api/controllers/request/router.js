@@ -1,5 +1,5 @@
 import express from 'express';
-import { findRequestsByUser, saveRequest } from '@models/Request/queries';
+import { findRequestsByUser, saveRequest, updateRequest } from '@models/Request/queries';
 import { logger, validate } from '../../middlewares';
 import { hasSession } from '../../middlewares/authorization';
 import { newRequestSchema } from './schemas';
@@ -22,8 +22,8 @@ router.get('/find-all', hasSession, async (req, res) => {
 
 router.post(
 	'/',
-	hasSession,
-	validate(newRequestSchema),
+	hasSession,//acceso
+	validate(newRequestSchema),//esquema del formulario
 	async ({ body, session_payload }, res) => {
 		try {
 			const payload = await saveRequest(session_payload.id, body);
@@ -34,7 +34,27 @@ router.post(
 			console.error(error);
 			res.status(500).json(error.message);
 		}
-	},
+	}
+
+//agregado
 );
+
+
+router.post(
+		'/update',
+		hasSession,
+		validate(newRequestSchema),
+		async ({ body, session_payload }, res) => {
+			try {
+				const payload = await updateRequest(session_payload.id, body);
+	
+				res.status(200).json({ payload, message: 'Request saved!' });
+			} catch (error) {
+				// eslint-disable-next-line no-console
+				console.error(error);
+				res.status(500).json(error.message);
+			}
+		},
+);//
 
 export { router };
